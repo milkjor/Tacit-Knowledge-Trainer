@@ -1,12 +1,32 @@
-# Tacit-Knowledge-Trainer
-隐性知识显性化表达网页
+# 隐性知识显性化表达
 
-这是一个单文件网页原型，用于演示如何把难以言说的感悟、直觉、审美和判断，转化为可观察、可命名、可练习、可迁移的表达能力。页面采用浅色柔和渐变和单中心训练流，避免复杂后台式布局，让用户始终聚焦在当前训练动作上。原型内置三个案例：关系、权力、审美。每个案例通过“故事、追问、练习、迁移”四步逐渐展开，并按 K-R-R-S 顺序标注 SRK 状态：故事阶段对应 Knowledge，追问和练习阶段对应 Rule，迁移阶段对应 Skill。用户先在故事中捕捉模糊判断，再把线索写成可追问的问题，随后通过轻量互动练习强化规则，最终生成包含盲区、线索、规则和迁移任务的表达卡。项目不依赖构建工具、后端或第三方库，直接打开 `index.html` 即可运行，适合概念演示、产品原型展示和后续交互设计迭代。
+这是一个面向隐性知识训练的网页原型，用于把难以言说的感悟、直觉、审美和判断，转化为可观察、可命名、可练习、可迁移的表达能力。页面采用米白浅色渐变和单中心训练流，内置关系、权力、审美三个固定案例，并支持用户输入任意隐性知识问题，由 AI 生成一条新的 K-R-R-S 训练路径。四步流程保持为“故事、追问、练习、迁移”：故事对应 Knowledge，追问和练习对应 Rule，迁移对应 Skill。用户先在故事中捕捉模糊判断，再把线索写成可追问的问题，随后通过互动练习强化规则，最终生成包含盲区、线索、规则和迁移任务的表达卡。
 
-## 使用
+## 文件结构
 
-直接用浏览器打开 `index.html`。
+- `index.html`：前端页面，包含 HTML、CSS 和浏览器端 JavaScript。
+- `api/generate-krrs.js`：Vercel Serverless API，用火山方舟模型生成 K-R-R-S 路径。
+- `.gitignore`：忽略环境变量、本地依赖、Vercel 缓存和打包文件。
 
-## 文件
+## 本地预览
 
-- `index.html`：完整网页原型，包含 HTML、CSS 和 JavaScript。
+直接打开 `index.html` 可以体验固定案例。AI 生成功能需要通过 Vercel 或本地 Serverless 环境访问 `/api/generate-krrs`。
+
+## Vercel 环境变量
+
+在 Vercel Project Settings 中添加：
+
+- `ARK_API_KEY`：火山方舟 API Key
+
+不要把 API Key 写入前端代码、README 或 Git。
+
+## Git 上传
+
+```bash
+git init
+git add index.html README.md .gitignore api/generate-krrs.js
+git commit -m "Add AI generated K-R-R-S path"
+```
+
+然后推送到 GitHub，并在 Vercel 导入该仓库。
+

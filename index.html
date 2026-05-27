@@ -247,6 +247,61 @@
       justify-self: start;
     }
 
+    .ai-builder {
+      display: grid;
+      gap: 12px;
+      width: min(760px, 100%);
+      justify-self: center;
+      margin: 4px 0 8px;
+    }
+
+    .ai-builder .prompt-box textarea {
+      min-height: 116px;
+    }
+
+    .ai-note {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .ai-state {
+      min-height: 40px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .52);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .ai-state.visible {
+      display: flex;
+    }
+
+    .ai-state.error {
+      border-color: rgba(154, 60, 50, .26);
+      background: rgba(200, 121, 95, .1);
+      color: #6a352d;
+    }
+
+    .mini-action {
+      min-height: 30px;
+      padding: 6px 9px;
+      border-radius: 8px;
+      color: #fffaf2;
+      background: var(--dark);
+      font-size: 12px;
+      font-weight: 720;
+      flex: 0 0 auto;
+    }
+
     .flow { display: grid; gap: 18px; }
     .flow-head { display: grid; gap: 14px; }
 
@@ -402,10 +457,12 @@
     .prompt-box {
       overflow: hidden;
       border-radius: 16px;
-      border: 1px solid rgba(31, 33, 29, .16);
-      background: #171916;
-      color: #fbf8f1;
-      box-shadow: 0 20px 60px rgba(31, 33, 29, .18);
+      border: 1px solid rgba(42, 39, 33, .14);
+      background:
+        linear-gradient(180deg, rgba(255, 253, 248, .9), rgba(250, 246, 237, .76)),
+        #fffaf2;
+      color: var(--ink);
+      box-shadow: 0 18px 56px rgba(64, 45, 24, .11);
     }
 
     .prompt-box textarea {
@@ -417,12 +474,12 @@
       border: 0;
       outline: 0;
       background: transparent;
-      color: #fbf8f1;
+      color: #2f2c27;
       font-size: 16px;
       line-height: 1.65;
     }
 
-    .prompt-box textarea::placeholder { color: rgba(251, 248, 241, .48); }
+    .prompt-box textarea::placeholder { color: rgba(47, 44, 39, .54); }
 
     .prompt-toolbar {
       display: flex;
@@ -430,11 +487,11 @@
       align-items: center;
       gap: 12px;
       padding: 10px;
-      border-top: 1px solid rgba(251, 248, 241, .1);
+      border-top: 1px solid rgba(42, 39, 33, .1);
     }
 
     .prompt-hint {
-      color: rgba(251, 248, 241, .56);
+      color: var(--muted);
       font-size: 12px;
     }
 
@@ -442,9 +499,14 @@
       min-height: 36px;
       padding: 8px 12px;
       border-radius: 8px;
-      color: var(--dark);
-      background: #fbf8f1;
+      color: #fffaf2;
+      background: var(--dark);
       font-weight: 760;
+    }
+
+    .prompt-submit:disabled {
+      opacity: .55;
+      cursor: not-allowed;
     }
 
     .example-row,
@@ -769,11 +831,93 @@
       userInput: "",
       practiceResult: null,
       selectedPractice: null,
-      sliders: { contrast: 12, space: 30, rhythm: 18 }
+      sliders: { contrast: 12, space: 30, rhythm: 18 },
+      aiQuestion: "",
+      aiStatus: "idle",
+      aiMessage: ""
     };
 
     function currentCase() {
       return cases[state.caseId];
+    }
+
+    function normalizeGeneratedCase(value) {
+      const requiredStrings = ["title", "short", "headline", "story", "question", "practiceTitle", "practice", "rule", "transfer"];
+      for (const key of requiredStrings) {
+        if (typeof value[key] !== "string" || !value[key].trim()) {
+          throw new Error(`AI 返回缺少有效字段：${key}`);
+        }
+      }
+      if (!Array.isArray(value.signals) || value.signals.length < 3) {
+        throw new Error("AI 返回的 signals 至少需要 3 项");
+      }
+      if (!Array.isArray(value.examples) || value.examples.length < 3) {
+        throw new Error("AI 返回的 examples 至少需要 3 项");
+      }
+      if (!Array.isArray(value.options) || value.options.length < 3) {
+        throw new Error("AI 返回的 options 至少需要 3 项");
+      }
+      const normalized = {
+        title: value.title.trim().slice(0, 12),
+        short: value.short.trim(),
+        headline: value.headline.trim(),
+        story: value.story.trim(),
+        question: value.question.trim(),
+        signals: value.signals.slice(0, 3).map((signal) => ({
+          text: String(signal.text || "").trim(),
+          insight: String(signal.insight || "").trim()
+        })).filter((signal) => signal.text && signal.insight),
+        examples: value.examples.slice(0, 3).map((example) => String(example).trim()).filter(Boolean),
+        practiceTitle: value.practiceTitle.trim(),
+        practice: value.practice.trim(),
+        options: value.options.slice(0, 3).map((option) => ({
+          text: String(option.text || "").trim(),
+          feedback: String(option.feedback || "").trim(),
+          correct: Boolean(option.correct)
+        })).filter((option) => option.text && option.feedback),
+        rule: value.rule.trim(),
+        transfer: value.transfer.trim()
+      };
+      if (normalized.signals.length < 3 || normalized.examples.length < 3 || normalized.options.length < 3) {
+        throw new Error("AI 返回的训练路径不完整，请重试。");
+      }
+      return normalized;
+    }
+
+    async function generateAiCase() {
+      const question = state.aiQuestion.trim();
+      if (!question || state.aiStatus === "loading") return;
+      if (location.protocol === "file:") {
+        state.aiStatus = "error";
+        state.aiMessage = "AI 生成功能需要部署到 Vercel，或通过本地 Serverless 环境访问，直接打开文件只能体验固定案例。";
+        renderHome();
+        return;
+      }
+      state.aiStatus = "loading";
+      state.aiMessage = "正在生成 K-R-R-S 路径...";
+      renderHome();
+
+      try {
+        const response = await fetch("/api/generate-krrs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(payload.error || "生成失败，请稍后重试。");
+        }
+        const generated = normalizeGeneratedCase(payload.case);
+        const caseId = `ai-${Date.now()}`;
+        cases[caseId] = generated;
+        state.aiStatus = "idle";
+        state.aiMessage = "";
+        startCase(caseId);
+      } catch (error) {
+        state.aiStatus = "error";
+        state.aiMessage = error.message || "生成失败，请稍后重试。";
+        renderHome();
+      }
     }
 
     function goHome() {
@@ -844,6 +988,25 @@
           <h1>隐性知识显性化表达</h1>
           <p>把说不清的判断，拆成可观察、可命名、可练习、可迁移的能力。</p>
         </div>
+        <div class="ai-builder">
+          <div class="prompt-box">
+            <textarea id="aiQuestion" placeholder="输入一个隐性知识问题，比如：我为什么总能感觉到一个人审美好，但说不清依据？">${state.aiQuestion}</textarea>
+            <div class="prompt-toolbar">
+              <span class="prompt-hint">AI 会生成一条故事、追问、练习、迁移的 K-R-R-S 路径。</span>
+              <button class="prompt-submit" id="generateAi" ${state.aiStatus === "loading" ? "disabled" : ""}>${state.aiStatus === "loading" ? "生成中" : "生成路径"}</button>
+            </div>
+          </div>
+          <div class="example-row">
+            <button class="chip" data-ai-example="我为什么能感觉到一个人很会处理关系，但说不出他做对了什么？">关系判断</button>
+            <button class="chip" data-ai-example="为什么有些会议看起来平等，但我总感觉真正的权力不在主持人手里？">权力结构</button>
+            <button class="chip" data-ai-example="我为什么觉得某个设计很高级，但无法说清具体依据？">审美直觉</button>
+          </div>
+          <div class="ai-state ${state.aiStatus !== "idle" ? "visible" : ""} ${state.aiStatus === "error" ? "error" : ""}">
+            <span>${state.aiMessage}</span>
+            ${state.aiStatus === "error" ? '<button class="mini-action" id="retryAi">重试</button>' : ""}
+          </div>
+          <div class="ai-note">也可以直接使用下方固定案例。AI 生成结果只在当前页面会话中临时存在。</div>
+        </div>
         <div class="case-grid">
           ${Object.entries(cases).map(([id, item]) => `
             <button class="case-card" data-case="${id}">
@@ -859,6 +1022,18 @@
       `;
       document.querySelectorAll("[data-case]").forEach(button => {
         button.addEventListener("click", () => startCase(button.dataset.case));
+      });
+      const aiQuestion = document.getElementById("aiQuestion");
+      aiQuestion.addEventListener("input", () => {
+        state.aiQuestion = aiQuestion.value;
+      });
+      document.getElementById("generateAi").addEventListener("click", generateAiCase);
+      document.getElementById("retryAi")?.addEventListener("click", generateAiCase);
+      document.querySelectorAll("[data-ai-example]").forEach(button => {
+        button.addEventListener("click", () => {
+          state.aiQuestion = button.dataset.aiExample;
+          renderHome();
+        });
       });
     }
 
