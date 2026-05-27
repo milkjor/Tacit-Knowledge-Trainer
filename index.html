@@ -1,0 +1,1148 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>隐性知识显性化表达</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f3ec;
+      --paper: rgba(255, 252, 245, .82);
+      --paper-strong: #fffdf8;
+      --ink: #1f211d;
+      --muted: #706d66;
+      --soft: #9b968b;
+      --line: rgba(42, 39, 33, .12);
+      --line-strong: rgba(42, 39, 33, .2);
+      --clay: #c8795f;
+      --sage: #6f8f7a;
+      --blue: #5f7fbd;
+      --dark: #171916;
+      --shadow: 0 24px 70px rgba(64, 45, 24, .13);
+      --radius: 10px;
+      font-family: Inter, "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 4%, rgba(200, 121, 95, .18), transparent 32%),
+        radial-gradient(circle at 86% 10%, rgba(95, 127, 189, .16), transparent 30%),
+        linear-gradient(145deg, #fbf8f1 0%, #f3eee5 48%, #ebe8df 100%);
+      overflow-x: hidden;
+    }
+
+    button, textarea { font: inherit; }
+    button { border: 0; cursor: pointer; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: center;
+      min-height: 64px;
+      padding: 14px 28px;
+      background: rgba(250, 247, 240, .78);
+      border-bottom: 1px solid rgba(42, 39, 33, .08);
+      backdrop-filter: blur(20px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      color: #fffaf2;
+      background: linear-gradient(135deg, #1e211d, #6f6254);
+      font-weight: 780;
+      font-size: 19px;
+      letter-spacing: 0;
+      flex: 0 0 auto;
+    }
+
+    .brand-title {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .brand-title strong {
+      font-size: 15px;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-title span {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      min-height: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .55);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    button.pill { color: var(--muted); }
+
+    .pill strong {
+      color: var(--ink);
+      font-weight: 720;
+    }
+
+    .main {
+      display: grid;
+      align-items: start;
+      justify-items: center;
+      padding: 54px 22px 70px;
+    }
+
+    .stage {
+      width: min(960px, 100%);
+      display: grid;
+      gap: 24px;
+    }
+
+    .home-hero {
+      display: grid;
+      gap: 18px;
+      justify-items: center;
+      text-align: center;
+      padding: 26px 0 8px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 30px;
+      padding: 6px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .52);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .home-hero h1 {
+      max-width: 760px;
+      margin: 0;
+      font-size: clamp(42px, 7vw, 82px);
+      line-height: .98;
+      letter-spacing: 0;
+      font-weight: 780;
+    }
+
+    .home-hero p {
+      max-width: 640px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.68;
+    }
+
+    .case-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .case-card {
+      min-height: 250px;
+      display: grid;
+      align-content: space-between;
+      gap: 22px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .78), rgba(255, 252, 245, .54)),
+        var(--paper);
+      box-shadow: 0 14px 44px rgba(64, 45, 24, .08);
+      text-align: left;
+      color: var(--ink);
+    }
+
+    .case-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(31, 33, 29, .22);
+      box-shadow: var(--shadow);
+    }
+
+    .case-kicker {
+      color: var(--soft);
+      font-size: 12px;
+      font-weight: 720;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .case-card h2 {
+      margin: 8px 0 12px;
+      font-size: 30px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .case-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    .case-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 10px 13px;
+      border-radius: 8px;
+      color: #fffaf2;
+      background: var(--dark);
+      font-size: 14px;
+      font-weight: 720;
+      justify-self: start;
+    }
+
+    .flow { display: grid; gap: 18px; }
+    .flow-head { display: grid; gap: 14px; }
+
+    .step-nav {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .48);
+    }
+
+    .step-tab {
+      min-height: 38px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--soft);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .step-tab.active {
+      background: var(--dark);
+      color: #fffaf2;
+    }
+
+    .step-tab.unlocked:not(.active):hover {
+      background: rgba(31, 33, 29, .07);
+      color: var(--ink);
+    }
+
+    .step-tab.locked {
+      opacity: .42;
+      cursor: not-allowed;
+    }
+
+    .focus-card {
+      display: grid;
+      gap: 24px;
+      padding: clamp(22px, 4vw, 42px);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .86), rgba(255, 251, 243, .72)),
+        var(--paper-strong);
+      box-shadow: var(--shadow);
+    }
+
+    .step-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .srk {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      color: var(--dark);
+      background: rgba(31, 33, 29, .07);
+      font-size: 12px;
+      font-weight: 720;
+    }
+
+    .focus-card h1 {
+      max-width: 780px;
+      margin: 0;
+      font-size: clamp(30px, 5vw, 56px);
+      line-height: 1.04;
+      letter-spacing: 0;
+      font-weight: 780;
+    }
+
+    .story-text {
+      max-width: 760px;
+      margin: 0;
+      color: #3c3a34;
+      font-size: 19px;
+      line-height: 1.82;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .choice {
+      min-height: 112px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .52);
+      color: var(--ink);
+      text-align: left;
+      line-height: 1.48;
+    }
+
+    .choice:hover,
+    .choice.selected {
+      border-color: rgba(31, 33, 29, .3);
+      background: #fffaf2;
+    }
+
+    .choice.selected {
+      box-shadow: inset 0 0 0 1px rgba(31, 33, 29, .22);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .primary,
+    .secondary {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 15px;
+      border-radius: 9px;
+      font-weight: 740;
+    }
+
+    .primary {
+      color: #fffaf2;
+      background: var(--dark);
+    }
+
+    .primary:disabled {
+      opacity: .42;
+      cursor: not-allowed;
+    }
+
+    .secondary {
+      color: var(--ink);
+      background: rgba(255, 255, 255, .58);
+      border: 1px solid var(--line);
+    }
+
+    .prompt-area { display: grid; gap: 14px; }
+
+    .prompt-box {
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid rgba(31, 33, 29, .16);
+      background: #171916;
+      color: #fbf8f1;
+      box-shadow: 0 20px 60px rgba(31, 33, 29, .18);
+    }
+
+    .prompt-box textarea {
+      width: 100%;
+      min-height: 150px;
+      resize: vertical;
+      display: block;
+      padding: 18px;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #fbf8f1;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    .prompt-box textarea::placeholder { color: rgba(251, 248, 241, .48); }
+
+    .prompt-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border-top: 1px solid rgba(251, 248, 241, .1);
+    }
+
+    .prompt-hint {
+      color: rgba(251, 248, 241, .56);
+      font-size: 12px;
+    }
+
+    .prompt-submit {
+      min-height: 36px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: var(--dark);
+      background: #fbf8f1;
+      font-weight: 760;
+    }
+
+    .example-row,
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip,
+    .tag {
+      min-height: 34px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .52);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .chip:hover {
+      color: var(--ink);
+      border-color: var(--line-strong);
+      background: #fffaf2;
+    }
+
+    .insight {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(111, 143, 122, .24);
+      background: rgba(111, 143, 122, .09);
+    }
+
+    .insight strong { font-size: 14px; }
+
+    .insight p {
+      margin: 0;
+      color: #4a5147;
+      line-height: 1.65;
+    }
+
+    .practice {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, .8fr);
+      gap: 14px;
+    }
+
+    .scenario {
+      min-height: 230px;
+      display: grid;
+      align-content: center;
+      gap: 12px;
+      padding: 22px;
+      border-radius: 14px;
+      color: #fffaf2;
+      background:
+        linear-gradient(135deg, rgba(200, 121, 95, .42), rgba(95, 127, 189, .28)),
+        #171916;
+    }
+
+    .scenario span {
+      color: rgba(255, 250, 242, .64);
+      font-size: 13px;
+      font-weight: 720;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .scenario p {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.72;
+    }
+
+    .feedback {
+      min-height: 94px;
+      display: grid;
+      align-content: center;
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid rgba(200, 121, 95, .24);
+      background: rgba(200, 121, 95, .09);
+      color: #5a3d32;
+      line-height: 1.65;
+    }
+
+    .aesthetic-lab {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 220px;
+      gap: 14px;
+    }
+
+    .poster {
+      min-height: 310px;
+      display: grid;
+      align-content: center;
+      gap: var(--poster-rhythm, 18px);
+      padding: var(--poster-space, 30px);
+      border-radius: 14px;
+      color: #1f211d;
+      background: linear-gradient(135deg, #f7ead9, #dfeadb);
+      border: 1px solid var(--line);
+    }
+
+    .poster h2 {
+      margin: 0;
+      max-width: 520px;
+      font-size: calc(34px + var(--poster-contrast, 12) * 1px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    .poster p {
+      max-width: 440px;
+      margin: 0;
+      color: rgba(31, 33, 29, .68);
+      line-height: 1.6;
+    }
+
+    .sliders {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .46);
+    }
+
+    .sliders label {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--dark);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .summary-item {
+      min-height: 132px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .52);
+    }
+
+    .summary-item strong {
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .summary-item p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.62;
+    }
+
+    .copy-card {
+      padding: 18px;
+      border-radius: 14px;
+      color: #fffaf2;
+      background: var(--dark);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 840px) {
+      .topbar {
+        grid-template-columns: 1fr;
+        padding: 12px 16px;
+      }
+
+      .status { justify-content: flex-start; }
+      .main { padding: 28px 14px 46px; }
+
+      .case-grid,
+      .choice-grid,
+      .practice,
+      .aesthetic-lab,
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .case-card { min-height: 190px; }
+
+      .step-nav {
+        border-radius: 14px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .step-tab { border-radius: 10px; }
+
+      .home-hero {
+        text-align: left;
+        justify-items: start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">T</div>
+        <div class="brand-title">
+          <strong>隐性知识显性化表达</strong>
+          <span>故事驱动的直觉表达训练</span>
+        </div>
+      </div>
+      <div class="status" id="status"></div>
+    </header>
+
+    <main class="main">
+      <section class="stage" id="app"></section>
+    </main>
+  </div>
+
+  <script>
+    const steps = [
+      { id: "story", label: "故事", srk: "Knowledge" },
+      { id: "name", label: "追问", srk: "Rule" },
+      { id: "practice", label: "练习", srk: "Rule" },
+      { id: "transfer", label: "迁移", srk: "Skill" }
+    ];
+
+    const cases = {
+      relation: {
+        title: "关系",
+        short: "我感觉关系变冷了，但说不出证据。",
+        question: "哪里最先让你觉得关系的温度变了？",
+        headline: "关系的变化，通常先表现为信号系统的变化。",
+        story: "你给一个朋友发了三条消息。对方都回了，但每次都隔很久，内容也变短。见面时对方依然客气，却不再主动延展话题。你说不出哪里不对，只觉得关系的温度变了。",
+        signals: [
+          { text: "回复时间变长，但没有解释。", insight: "时间差本身不是问题，它改变的是“我是否仍被优先看见”的信号。" },
+          { text: "回应了事实，没有回应情绪。", insight: "关系里的距离常先体现在回应层级：信息被处理了，感受没有被接住。" },
+          { text: "礼貌还在，主动性消失。", insight: "礼貌维持表面稳定，主动性暴露真实投入。" }
+        ],
+        examples: [
+          "为什么我感觉这段关系变冷了，但又说不出证据？",
+          "如何判断对方是在设边界，还是在疏远我？",
+          "我该怎么把关系里的不舒服表达清楚？"
+        ],
+        practiceTitle: "对话片段",
+        practice: "A：最近项目压力有点大，我有点撑不住。 B：嗯，你先把排期发我，我看哪里能压缩。",
+        options: [
+          { text: "高效率回应", feedback: "只答对了一半。B 处理了任务，却跳过情绪承接，关系信号会变冷。", correct: false },
+          { text: "边界清晰但情绪缺席", feedback: "准确。关系不只交换信息，也交换被理解的证据。", correct: true },
+          { text: "过度亲密", feedback: "不太像。B 没有越界，只是把情绪入口关掉了。", correct: false }
+        ],
+        rule: "关系判断不是先猜动机，而是先拆回应层级、主动性、边界和未明说期待。",
+        transfer: "把“对方不在乎我”改写成三个可观察事实，再决定是否沟通。"
+      },
+      power: {
+        title: "权力",
+        short: "会议看似平等，但真实决策早已被框住。",
+        question: "这个场合里，谁在定义什么可以被讨论？",
+        headline: "权力不总是命令，它更常藏在谁能定义问题。",
+        story: "一次会议里，名义上的主持人不断邀请大家自由讨论。但每当有人提出不同方案，坐在角落的一位负责人只问一句“这个风险谁承担”，话题就会自动回到原方案。没有人明说服从，却没人再推进新想法。",
+        signals: [
+          { text: "不用发号施令，也能让话题转向。", insight: "权力常体现为议程重力：不用说结论，也能改变讨论路径。" },
+          { text: "风险问题一出现，探索就停止。", insight: "谁能定义风险，谁就能控制许可边界。" },
+          { text: "形式上开放，结果上收束。", insight: "开放流程和真实授权不是一回事，隐性排序决定什么能被认真讨论。" }
+        ],
+        examples: [
+          "为什么这个会议明明开放讨论，却没人真的反对？",
+          "如何识别一个场合里真正有权力的人？",
+          "怎样把隐性的权力结构说清楚而不显得冒犯？"
+        ],
+        practiceTitle: "会议布置",
+        practice: "圆桌会议中，CEO 坐在屏幕旁边不主持。每个方案最终都要被投到屏幕上修改，操作电脑的人只听 CEO 的短句。",
+        options: [
+          { text: "权力在主持人手里", feedback: "表层上像主持人，实际控制点在屏幕、修改权和 CEO 的短句。", correct: false },
+          { text: "权力在工具控制与最终解释权里", feedback: "准确。权力被嵌入了操作位置和最终解释权。", correct: true },
+          { text: "这是完全平等的讨论", feedback: "形式上平等，决策路径并不平等。", correct: false }
+        ],
+        rule: "权力判断要观察谁开题、谁改题、谁终止题，以及谁控制资源入口。",
+        transfer: "观察一个新会议：记录谁开题、谁改题、谁终止题。"
+      },
+      taste: {
+        title: "审美",
+        short: "我觉得它不高级，但说不出哪里差。",
+        question: "你的不适来自拥挤、无聊、失衡，还是意图混乱？",
+        headline: "审美判断，是对秩序、张力和意图一致性的快速感知。",
+        story: "你看到一张活动海报。颜色高级，字体也不差，但总觉得不够有力量。标题、日期、地点和装饰元素都在抢注意力，视线不知道先落在哪里。你说它“不高级”，其实是在感到秩序没有形成。",
+        signals: [
+          { text: "所有元素都想被看见。", insight: "混乱常来自层级失败：没有主次，注意力就没有路径。" },
+          { text: "颜色好看，但不服务主题。", insight: "审美不是素材质量相加，而是意图一致性。" },
+          { text: "信息之间没有呼吸感。", insight: "留白不是空，它是让判断发生的间隔。" }
+        ],
+        examples: [
+          "为什么我觉得这个设计不高级，但说不出哪里差？",
+          "如何把审美直觉拆成可调整的设计变量？",
+          "怎么判断一个作品是有风格，还是只是堆元素？"
+        ],
+        practiceTitle: "审美调参",
+        practice: "拖动参数，观察画面从平淡、拥挤到更有层级的变化。",
+        options: [],
+        rule: "审美判断先建立主次，再调节节奏，最后确认每个元素是否服务同一意图。",
+        transfer: "把“高级”改写为：主次清楚、节奏稳定、张力有控制、元素服务同一意图。"
+      }
+    };
+
+    const state = {
+      page: "home",
+      caseId: null,
+      step: 0,
+      maxStep: 0,
+      selectedSignal: null,
+      userInput: "",
+      practiceResult: null,
+      selectedPractice: null,
+      sliders: { contrast: 12, space: 30, rhythm: 18 }
+    };
+
+    function currentCase() {
+      return cases[state.caseId];
+    }
+
+    function goHome() {
+      state.page = "home";
+      state.caseId = null;
+      state.step = 0;
+      state.maxStep = 0;
+      state.selectedSignal = null;
+      state.userInput = "";
+      state.practiceResult = null;
+      state.selectedPractice = null;
+      render();
+    }
+
+    function startCase(caseId) {
+      state.page = "flow";
+      state.caseId = caseId;
+      state.step = 0;
+      state.maxStep = 0;
+      state.selectedSignal = null;
+      state.userInput = "";
+      state.practiceResult = null;
+      state.selectedPractice = null;
+      render();
+    }
+
+    function unlock(step) {
+      state.maxStep = Math.max(state.maxStep, step);
+    }
+
+    function setStep(step) {
+      if (step <= state.maxStep) {
+        state.step = step;
+        render();
+      }
+    }
+
+    function selectedSignal() {
+      const item = currentCase();
+      return Number.isInteger(state.selectedSignal) ? item.signals[state.selectedSignal] : null;
+    }
+
+    function render() {
+      renderStatus();
+      if (state.page === "home") renderHome();
+      if (state.page === "flow") renderFlow();
+    }
+
+    function renderStatus() {
+      const status = document.getElementById("status");
+      if (state.page === "home") {
+        status.innerHTML = '<span class="pill">模式 <strong>渐进式披露</strong></span>';
+        return;
+      }
+      const item = currentCase();
+      status.innerHTML = `
+        <button class="pill" id="backHome">案例 <strong>${item.title}</strong></button>
+        <span class="pill">阶段 <strong>${steps[state.step].label}</strong></span>
+        <span class="pill">SRK <strong>${steps[state.step].srk}</strong></span>
+      `;
+      document.getElementById("backHome").addEventListener("click", goHome);
+    }
+
+    function renderHome() {
+      document.getElementById("app").innerHTML = `
+        <div class="home-hero">
+          <span class="eyebrow">Tacit Knowledge Trainer</span>
+          <h1>隐性知识显性化表达</h1>
+          <p>把说不清的判断，拆成可观察、可命名、可练习、可迁移的能力。</p>
+        </div>
+        <div class="case-grid">
+          ${Object.entries(cases).map(([id, item]) => `
+            <button class="case-card" data-case="${id}">
+              <div>
+                <span class="case-kicker">案例 ${item.title}</span>
+                <h2>${item.title}</h2>
+                <p>${item.short}</p>
+              </div>
+              <span class="case-action">开始显化</span>
+            </button>
+          `).join("")}
+        </div>
+      `;
+      document.querySelectorAll("[data-case]").forEach(button => {
+        button.addEventListener("click", () => startCase(button.dataset.case));
+      });
+    }
+
+    function renderFlow() {
+      const item = currentCase();
+      document.getElementById("app").innerHTML = `
+        <div class="flow">
+          <div class="flow-head">
+            <div class="step-nav">
+              ${steps.map((step, index) => `
+                <button class="step-tab ${index === state.step ? "active" : ""} ${index <= state.maxStep ? "unlocked" : "locked"}" data-step="${index}">
+                  ${index + 1}. ${step.label}
+                </button>
+              `).join("")}
+            </div>
+          </div>
+          ${renderStep(item)}
+        </div>
+      `;
+      document.querySelectorAll("[data-step]").forEach(button => {
+        button.addEventListener("click", () => setStep(Number(button.dataset.step)));
+      });
+      bindStepEvents(item);
+    }
+
+    function renderStep(item) {
+      if (state.step === 0) return renderStoryStep(item);
+      if (state.step === 1) return renderNameStep(item);
+      if (state.step === 2) return renderPracticeStep(item);
+      return renderTransferStep(item);
+    }
+
+    function renderStoryStep(item) {
+      return `
+        <article class="focus-card">
+          <div class="step-label">
+            <span>Step 1 · 故事</span>
+            <span class="srk">SRK · Knowledge</span>
+          </div>
+          <h1>${item.headline}</h1>
+          <p class="story-text">${item.story}</p>
+          <div><div class="eyebrow">${item.question}</div></div>
+          <div class="choice-grid">
+            ${item.signals.map((signal, index) => `
+              <button class="choice ${state.selectedSignal === index ? "selected" : ""}" data-signal="${index}">
+                ${signal.text}
+              </button>
+            `).join("")}
+          </div>
+          ${selectedSignal() ? `<div class="insight"><strong>你抓到的线索</strong><p>${selectedSignal().insight}</p></div>` : ""}
+          <div class="actions">
+            <button class="primary" id="toName" ${selectedSignal() ? "" : "disabled"}>继续追问</button>
+            <button class="secondary" id="home">换一个案例</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderNameStep(item) {
+      const signal = selectedSignal();
+      return `
+        <article class="focus-card">
+          <div class="step-label">
+            <span>Step 2 · 追问</span>
+            <span class="srk">SRK · Rule</span>
+          </div>
+          <h1>把模糊感受写成一个可以追问的问题。</h1>
+          <div class="insight">
+            <strong>已显化线索</strong>
+            <p>${signal ? signal.insight : "先回到故事步骤选择一个触发点。"}</p>
+          </div>
+          <div class="prompt-area">
+            <div class="prompt-box">
+              <textarea id="userInput" placeholder="输入任何问题，例如：${item.examples[0]}">${state.userInput}</textarea>
+              <div class="prompt-toolbar">
+                <span class="prompt-hint">问题、判断、片段、感受都可以。先具体，再解释。</span>
+                <button class="prompt-submit" id="submitInput">显化</button>
+              </div>
+            </div>
+            <div class="example-row">
+              ${item.examples.map(example => `<button class="chip" data-example="${example}">${example}</button>`).join("")}
+            </div>
+          </div>
+          <div class="actions">
+            <button class="primary" id="toPractice" ${state.userInput.trim() ? "" : "disabled"}>进入练习</button>
+            <button class="secondary" id="backStory">返回故事</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderPracticeStep(item) {
+      if (state.caseId === "taste") return renderTastePractice(item);
+      return `
+        <article class="focus-card">
+          <div class="step-label">
+            <span>Step 3 · 练习</span>
+            <span class="srk">SRK · Rule</span>
+          </div>
+          <h1>现在用规则做一次判断。</h1>
+          <div class="practice">
+            <div class="scenario">
+              <span>${item.practiceTitle}</span>
+              <p>${item.practice}</p>
+            </div>
+            <div class="prompt-area">
+              <div class="choice-grid" style="grid-template-columns: 1fr;">
+                ${item.options.map((option, index) => `
+                  <button class="choice ${state.selectedPractice === index ? "selected" : ""}" data-practice="${index}">
+                    ${option.text}
+                  </button>
+                `).join("")}
+              </div>
+              <div class="feedback">${state.practiceResult || "先选择一个判断。重点不是猜答案，而是看见自己依据了什么线索。"}</div>
+            </div>
+          </div>
+          ${state.practiceResult ? `<div class="insight"><strong>规则</strong><p>${item.rule}</p></div>` : ""}
+          <div class="actions">
+            <button class="primary" id="toTransfer" ${state.practiceResult ? "" : "disabled"}>生成迁移表达</button>
+            <button class="secondary" id="backName">返回追问</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderTastePractice(item) {
+      return `
+        <article class="focus-card">
+          <div class="step-label">
+            <span>Step 3 · 练习</span>
+            <span class="srk">SRK · Rule</span>
+          </div>
+          <h1>调一个变量，观察判断如何改变。</h1>
+          <div class="aesthetic-lab">
+            <div class="poster" id="poster">
+              <h2>静默展览<br>OPEN STUDIO</h2>
+              <p>当标题、间距和节奏彼此配合，画面会更快形成可信的第一印象。</p>
+            </div>
+            <div class="sliders">
+              <label>标题对比 <input type="range" min="4" max="24" value="${state.sliders.contrast}" data-slider="contrast"></label>
+              <label>留白密度 <input type="range" min="12" max="52" value="${state.sliders.space}" data-slider="space"></label>
+              <label>节奏间隔 <input type="range" min="8" max="34" value="${state.sliders.rhythm}" data-slider="rhythm"></label>
+              <button class="primary" id="lockTaste">提取规则</button>
+            </div>
+          </div>
+          ${state.practiceResult ? `<div class="insight"><strong>规则</strong><p>${item.rule}</p></div>` : ""}
+          <div class="actions">
+            <button class="primary" id="toTransfer" ${state.practiceResult ? "" : "disabled"}>生成迁移表达</button>
+            <button class="secondary" id="backName">返回追问</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderTransferStep(item) {
+      const signal = selectedSignal();
+      const input = state.userInput.trim() || item.short;
+      return `
+        <article class="focus-card">
+          <div class="step-label">
+            <span>Step 4 · 迁移</span>
+            <span class="srk">SRK · Skill</span>
+          </div>
+          <h1>把这次直觉，保存成可迁移的表达。</h1>
+          <div class="summary-grid">
+            <div class="summary-item"><strong>盲区</strong><p>${input}</p></div>
+            <div class="summary-item"><strong>线索</strong><p>${signal ? signal.insight : "从故事里提取一个触发判断的具体信号。"}</p></div>
+            <div class="summary-item"><strong>规则</strong><p>${item.rule}</p></div>
+            <div class="summary-item"><strong>迁移任务</strong><p>${item.transfer}</p></div>
+          </div>
+          <div class="copy-card">
+            我原本的判断是“${input}”。现在我先观察具体线索，再区分事实和解释，最后用规则表达：${item.transfer}
+          </div>
+          <div class="actions">
+            <button class="primary" id="restart">重新训练一个案例</button>
+            <button class="secondary" id="backPractice">返回练习</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function bindStepEvents(item) {
+      document.getElementById("home")?.addEventListener("click", goHome);
+      document.getElementById("backStory")?.addEventListener("click", () => setStep(0));
+      document.getElementById("backName")?.addEventListener("click", () => setStep(1));
+      document.getElementById("backPractice")?.addEventListener("click", () => setStep(2));
+      document.getElementById("restart")?.addEventListener("click", goHome);
+
+      document.querySelectorAll("[data-signal]").forEach(button => {
+        button.addEventListener("click", () => {
+          state.selectedSignal = Number(button.dataset.signal);
+          unlock(1);
+          render();
+        });
+      });
+
+      document.getElementById("toName")?.addEventListener("click", () => {
+        if (selectedSignal()) {
+          unlock(1);
+          state.step = 1;
+          render();
+        }
+      });
+
+      const input = document.getElementById("userInput");
+      input?.addEventListener("input", () => {
+        state.userInput = input.value;
+        if (state.userInput.trim()) unlock(2);
+        document.getElementById("toPractice").disabled = !state.userInput.trim();
+        document.querySelectorAll("[data-step]").forEach(button => {
+          const index = Number(button.dataset.step);
+          button.classList.toggle("locked", index > state.maxStep);
+          button.classList.toggle("unlocked", index <= state.maxStep);
+        });
+        renderStatus();
+      });
+
+      document.querySelectorAll("[data-example]").forEach(button => {
+        button.addEventListener("click", () => {
+          state.userInput = button.dataset.example;
+          unlock(2);
+          render();
+        });
+      });
+
+      document.getElementById("submitInput")?.addEventListener("click", () => {
+        if (state.userInput.trim()) {
+          unlock(2);
+          state.step = 2;
+          render();
+        }
+      });
+
+      document.getElementById("toPractice")?.addEventListener("click", () => {
+        if (state.userInput.trim()) {
+          unlock(2);
+          state.step = 2;
+          render();
+        }
+      });
+
+      document.querySelectorAll("[data-practice]").forEach(button => {
+        button.addEventListener("click", () => {
+          const index = Number(button.dataset.practice);
+          state.selectedPractice = index;
+          state.practiceResult = item.options[index].feedback;
+          unlock(3);
+          render();
+        });
+      });
+
+      document.querySelectorAll("[data-slider]").forEach(slider => {
+        slider.addEventListener("input", () => {
+          state.sliders[slider.dataset.slider] = Number(slider.value);
+          updatePoster();
+        });
+      });
+
+      document.getElementById("lockTaste")?.addEventListener("click", () => {
+        state.practiceResult = item.rule;
+        unlock(3);
+        render();
+      });
+
+      document.getElementById("toTransfer")?.addEventListener("click", () => {
+        if (state.practiceResult) {
+          unlock(3);
+          state.step = 3;
+          render();
+        }
+      });
+
+      updatePoster();
+    }
+
+    function updatePoster() {
+      const poster = document.getElementById("poster");
+      if (!poster) return;
+      poster.style.setProperty("--poster-contrast", state.sliders.contrast);
+      poster.style.setProperty("--poster-space", `${state.sliders.space}px`);
+      poster.style.setProperty("--poster-rhythm", `${state.sliders.rhythm}px`);
+    }
+
+    render();
+  </script>
+</body>
+</html>
